@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE ROYAL PLATTERS - Order Now</title>
+    
+    <link rel="manifest" href="/the-royal-platters/manifest.json">
+
+    <style>
+        /* --- BRANDING STYLES --- */
+        :root {
+            --color-black: #1C1C1C; 
+            --color-gold: #FFB606; 
+            --color-white: #F5F5F5;
+            --font-primary: 'Georgia', serif;
+            --font-secondary: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: var(--color-black);
+            color: var(--color-white);
+            font-family: var(--font-secondary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            overflow-x: hidden;
+        }
+
+        /* --- NEW VIDEO BACKGROUND CSS --- */
+        #bg-video {
+           position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            object-fit: cover; /* Ensures video is centered and covers screen */
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Dark overlay to make Gold text readable */
+            background: rgba(0, 0, 0, 0.7); 
+            z-index: -1; /* Sits on top of video, behind content */
+        }
+
+        /* --- LOADER STYLES --- */
+        #loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            /* Ensure you uploaded bg-loader.jpg */
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('bg-loader.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease-out, visibility 1s;
+        }
+        
+        .loader-hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-logo-img {
+            width: 150px; 
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+            animation: pulse-gold 2s infinite;
+        }
+
+        .loader-spinner {
+            width: 40px; height: 40px;
+            border: 3px solid rgba(255, 182, 6, 0.3);
+            border-top: 3px solid var(--color-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes pulse-gold {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- MAIN CONTENT STYLES --- */
+        .container {
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+            padding-bottom: 80px; 
+            
+            /* CRITICAL CHANGE: This ensures content sits ON TOP of the video */
+            position: relative;
+            z-index: 1; 
+        }
+
+        .header { padding: 40px 0 30px; }
+        .logo-text {
+            font-family:'Times New Roman', Times, serif;
+            font-size: 2.5em;
+            color: var(--color-gold);
+            letter-spacing: 1px;
+            margin: 0;
+        }
+        .tagline {
+            font-size: 1.1em;
+            color: var(--color-white);
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        .hero {
+            margin-bottom: 40px;
+            /* Made slightly more transparent so video shows through */
+            background: linear-gradient(180deg, rgba(0,0,0,0.3), rgba(0,0,0,0.6));
+            padding: 20px 0;
+            border-radius: 10px;
+            animation: fadeIn 2s ease-in;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .cta-heading {
+            font-size: 1.6em;
+            margin-bottom: 15px;
+            color: var(--color-gold);
+        }
+
+        .order-button {
+            display: inline-block;
+            background-color: var(--color-gold);
+            color: var(--color-black);
+            text-decoration: none;
+            padding: 15px 35px;
+            font-size: 1.4em;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: background-color 0.2s ease;
+            box-shadow: 0 4px 10px rgba(255, 182, 6, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .details-section {
+            border-top: 1px solid rgba(255, 182, 6, 0.2);
+            padding-top: 30px;
+            margin-top: 30px;
+            text-align: left;
+        }
+        .details-section h3 { color: var(--color-gold); font-size: 1.2em; margin-bottom: 10px; }
+        .details-section p { margin: 5px 0 20px 0; line-height: 1.6; }
+        
+        .feature-list {
+            list-style: none; padding: 0; margin-top: 10px;
+            display: flex; justify-content: space-around;
+        }
+        .feature-list li { font-size: 0.9em; color: var(--color-white); }
+        .feature-list li:before { content: "•"; color: var(--color-gold); margin-right: 5px; }
+
+        .footer {
+            margin-top: auto; padding: 20px 0; font-size: 0.8em; color: #ccc;
+        }
+
+        /* --- INSTALL DIALOG STYLES --- */
+        .install-container {
+            display: none; 
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            background: rgba(28, 28, 28, 0.95);
+            border: 1px solid var(--color-gold);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .install-btn {
+            background-color: var(--color-gold);
+            color: var(--color-black);
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .ios-instructions {
+            display: none;
+            color: var(--color-white);
+            font-size: 0.9rem;
+        }
+        .ios-instructions p { margin: 5px 0; }
+        .ios-close {
+            margin-top:10px; background:transparent; border:1px solid #FFB606; 
+            color:#FFB606; padding:5px 10px; border-radius:5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <video autoplay muted loop playsinline webkit-playsinline id="bg-video" poster="bg-loader.jpg">
+        <source src="background.mp4" type="video/mp4">
+    </video>
+    <div class="overlay"></div>
+    <div id="loader">
+        <img src="icon-512.png" alt="The Royal Platters Logo" class="loader-logo-img">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1 class="logo-text">The Royal Platters</h1>
+            <p class="tagline">“Authentic Taste Served with Royal Elegance”</p>
+        </header>
+
+        <section class="hero">
+            <h2 class="cta-heading">Premium Taste Starts With One Tap</h2>
+            <a href="https://qr.posease.com/app/68e23b3d2462f2a9181bef78" class="order-button">
+                Our Menu
+            </a>
+            <ul class="feature-list">
+                <li>BIRYANI</li>
+                <li>CHINESE</li>
+                <li>DRINKS</li>
+                <li>CAFÉ DELIGHTS</li>
+            </ul>
+        </section>
+
+        <section class="details-section">
+            <h3>Seamless Ordering</h3>
+            <p>Welcome to the official app for THE ROYAL PLATTERS. Tap the button above to view our full menu. <br>Use this app for home delivery!</p>
+            <h3>Our Location</h3>
+            <p>Find us easily near Jagan Theatre, Ramanathapuram.</p>
+            <h3>For Contact</h3>
+            <p>842 88 11 444</p>
+        </section>
+        
+        <footer class="footer">
+            &copy; 2025 The Royal Platters. All Rights Reserved.
+        </footer>
+    </div>
+
+    <div id="install-container" class="install-container">
+        <button id="install-btn" class="install-btn">
+             Install App
+        </button>
+        <div id="ios-instructions" class="ios-instructions">
+            <p>To install on iPhone:</p>
+            <p>1. Tap the <strong>Share</strong> button <span style="font-size:1.2em">⎋</span></p>
+            <p>2. Scroll down and tap <strong>"Add to Home Screen"</strong></p>
+            <button class="ios-close" onclick="document.getElementById('install-container').style.display='none'">Close</button>
+        </div>
+    </div>
+
+    <script>
+      // 1. Register Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/the-royal-platters/pwabuilder-sw.js'); 
+        });
+      }
+
+      // 2. Animation Logic (Fade out loader)
+      window.addEventListener("load", function () {
+          const loader = document.getElementById("loader");
+          // Wait 2 seconds so people see the logo, then fade out
+          setTimeout(function() {
+              loader.classList.add("loader-hidden");
+              loader.addEventListener("transitionend", function() {
+                  document.body.removeChild(loader);
+              });
+          }, 2000); 
+      });
+
+      // 3. Install Dialog Logic
+      let deferredPrompt;
+      const installContainer = document.getElementById('install-container');
+      const installBtn = document.getElementById('install-btn');
+      const iosText = document.getElementById('ios-instructions');
+
+      const isIos = () => {
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        return /iphone|ipad|ipod/.test( userAgent );
+      }
+      const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installContainer.style.display = 'block';
+        installBtn.style.display = 'block';
+      });
+
+      installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          console.log(`User response: ${outcome}`);
+          deferredPrompt = null;
+          installContainer.style.display = 'none';
+        }
+      });
+
+      if (isIos() && !isInStandaloneMode()) {
+        installContainer.style.display = 'block';
+        installBtn.style.display = 'none';
+        iosText.style.display = 'block';
+      }
+    </script>
+
+</body>
+</html>
+
